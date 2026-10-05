@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>SelfMail 自邮</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='16' fill='%23111'/%3E%3Cpath d='M16 24h32v20H16z' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M16 24l16 12 16-12' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0b0c0e">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="/icon-192.png">
+</head>
+<body>
+<div class="aura" id="aura" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<div id="app">
+  <!-- 登录 -->
+  <div class="view" id="view-login">
+    <div class="login-stage" id="login-stage">
+      <div class="login-card glass">
+        <div class="logo">
+          <svg viewBox="0 0 64 64" fill="none"><rect x="6" y="16" width="52" height="34" rx="8" stroke="currentColor" stroke-width="3.4"/><path d="M10 20l22 16 22-16" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg>
+        </div>
+        <h1>SelfMail 自邮</h1>
+        <div class="sub" id="login-sub">自托管 · 保密邮件系统</div>
+        <input id="li-user" placeholder="账号" autocomplete="username" autocapitalize="none">
+        <input id="li-pass" type="password" placeholder="密码" autocomplete="current-password">
+        <button class="btn solid" id="li-btn">进 入</button>
+        <div class="err" id="li-err"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 邮件 -->
+  <div class="view" id="view-mail">
+    <div class="dock glass">
+      <button class="btn" id="theme-btn" title="外观">◐</button>
+      <button class="btn" id="admin-btn" title="管理后台">管理</button>
+      <button class="btn" id="logout-btn" title="退出">退出</button>
+    </div>
+    <div class="mail-grid" id="mail-grid">
+      <div class="col side glass">
+        <div class="pane-head"><h2>自邮</h2>
+          <button class="btn ghost" id="folder-new" title="新建文件夹">＋</button></div>
+        <div class="scroll"><div class="folder-list" id="folders"></div></div>
+        <div class="side-foot">
+          <button class="btn" id="mails-btn">邮箱</button>
+          <button class="btn ghost" id="settings-btn">密码</button>
+        </div>
+      </div>
+      <div class="col list glass">
+        <div class="pane-head">
+          <button class="btn ghost back-btn" id="back-btn" style="display:none">‹</button>
+          <h2 id="list-title">收件箱</h2>
+          <label style="margin:0; display:flex; align-items:center; gap:5px; font-size:12px">
+            <input type="checkbox" id="unseen-only" style="width:auto"> 未读
+          </label>
+        </div>
+        <div class="pane-head" style="padding-top:0; border-bottom:none; padding-bottom:4px">
+          <input id="search" placeholder="搜索主题 / 发件人 / 正文…">
+        </div>
+        <div class="scroll" id="mail-list"></div>
+      </div>
+      <div class="col read glass" id="read-col">
+        <div class="empty" id="read-empty">选择一封邮件查看<br><span style="font-size:11px">液态玻璃 · 端到端本地存储 · 全链路 TLS</span></div>
+        <div class="read" id="read" style="display:none">
+          <div class="read-head">
+            <div class="subj" id="r-subj"></div>
+            <div class="meta" id="r-meta"></div>
+            <div class="actions">
+              <button class="btn" id="r-reply">回复</button>
+              <button class="btn" id="r-star">标旗</button>
+              <button class="btn" id="r-unread">未读</button>
+              <button class="btn danger" id="r-del">删除</button>
+            </div>
+          </div>
+          <div class="atts" id="r-atts"></div>
+          <div class="scroll read-body" id="r-body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 管理后台 -->
+  <div class="view" id="view-admin">
+    <div class="admin-wrap">
+      <div class="pane-head glass" style="border-radius:var(--r-lg)">
+        <h2 style="font-size:16px">管理后台</h2>
+        <div style="flex:1"></div>
+        <button class="btn" id="admin-back">返回邮箱</button>
+      </div>
+      <div class="admin-tabs" id="admin-tabs">
+        <div class="tab on" data-t="overview">概览</div>
+        <div class="tab" data-t="users">用户</div>
+        <div class="tab" data-t="aliases">别名</div>
+        <div class="tab" data-t="queue">出站队列</div>
+        <div class="tab" data-t="logs">日志</div>
+        <div class="tab" data-t="dns">DNS</div>
+      </div>
+      <div class="tab-panel on" id="tp-overview"><div class="glass card scroll" style="height:100%"><div id="ov-body">加载中…</div></div></div>
+      <div class="tab-panel" id="tp-users"><div class="glass card scroll" style="height:100%">
+        <h3>用户与配额</h3>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px">
+          <input id="nu-user" placeholder="账号" style="width:140px">
+          <input id="nu-name" placeholder="姓名" style="width:120px">
+          <input id="nu-pass" placeholder="初始密码" style="width:150px" type="password">
+          <input id="nu-quota" placeholder="配额MB" style="width:100px" type="number" value="2048">
+          <select id="nu-admin" style="width:110px"><option value="">普通</option><option value="1">管理员</option></select>
+          <button class="btn solid" id="nu-add">创建</button>
+        </div>
+        <div id="users-body">加载中…</div>
+      </div></div>
+      <div class="tab-panel" id="tp-aliases"><div class="glass card scroll" style="height:100%">
+        <h3>别名（如 sales@域名 → tom）</h3>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px">
+          <input id="na-alias" placeholder="别名" style="width:180px">
+          <input id="na-target" placeholder="目标账号" style="width:160px">
+          <button class="btn solid" id="na-add">添加</button>
+        </div>
+        <div id="alias-body">加载中…</div>
+      </div></div>
+      <div class="tab-panel" id="tp-queue"><div class="glass card scroll" style="height:100%">
+        <h3>出站队列 <button class="btn" id="q-retry-all">全部重试</button> <button class="btn danger" id="q-clear-all">清空</button></h3>
+        <div id="queue-body">加载中…</div>
+      </div></div>
+      <div class="tab-panel" id="tp-logs"><div class="glass card scroll" style="height:100%">
+        <h3>安全与投递日志</h3>
+        <div id="logs-body">加载中…</div>
+      </div></div>
+      <div class="tab-panel" id="tp-dns"><div class="glass card scroll" style="height:100%">
+        <h3>DNS 记录向导</h3><div id="dns-body">加载中…</div>
+        <hr>
+        <h3>实时校验</h3><div><button class="btn" id="dns-check">立即检测</button></div>
+        <div id="dns-check-body"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 撰写 -->
+<div class="overlay" id="compose-ov">
+  <div class="compose glass">
+    <div class="pane-head"><h2>新邮件</h2><button class="btn ghost" id="c-close">✕</button></div>
+    <div class="scroll">
+      <label>收件人</label><input id="c-to" placeholder="a@example.com, b@example.com">
+      <label>抄送 / 密送</label><input id="c-cc" placeholder="可选"><input id="c-bcc" placeholder="可选" style="margin-top:8px">
+      <label>主题</label><input id="c-subj">
+      <label>正文</label><textarea id="c-body" style="min-height:200px"></textarea>
+      <label>附件</label><input type="file" id="c-files" multiple>
+      <div id="c-atts"></div>
+    </div>
+    <div class="compose-actions">
+      <button class="btn solid" id="c-send">发送</button>
+      <button class="btn" id="c-draft">存草稿</button>
+      <div style="flex:1"></div>
+      <span class="badge" id="c-status"></span>
+    </div>
+  </div>
+</div>
+
+<!-- 改密 -->
+<div class="overlay" id="pw-ov">
+  <div class="glass card" style="width:min(360px,92vw)">
+    <h3>修改密码</h3>
+    <label>旧密码</label><input type="password" id="pw-old">
+    <label>新密码（至少 8 位）</label><input type="password" id="pw-new">
+    <div style="display:flex; gap:8px; margin-top:16px; justify-content:flex-end">
+      <button class="btn ghost" id="pw-cancel">取消</button>
+      <button class="btn solid" id="pw-ok">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="glass"></div>
+<script>
+if ("serviceWorker" in navigator) {
+  addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+}
+</script>
+<script src="/app.js"></script>
+</body>
+</html>

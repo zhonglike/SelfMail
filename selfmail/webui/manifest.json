@@ -1,0 +1,13 @@
+{
+  "name": "SelfMail 自邮",
+  "short_name": "SelfMail",
+  "description": "自托管邮件服务器 · Webmail 与管理后台",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f5f7",
+  "theme_color": "#0b0c0e",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
